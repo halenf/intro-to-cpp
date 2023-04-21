@@ -4,15 +4,12 @@
 using namespace std;
 
 DataFile::DataFile()
-{
-
-}
+{ }
 
 DataFile::~DataFile()
-{
-	
-}
+{ }
 
+// Creates a new record from the parameters and adds it to a vector to be saved with DataFile::Save later
 void DataFile::AddRecord(string imageFilename, string name, int age)
 {
 	Image i = LoadImage(imageFilename.c_str());
@@ -22,16 +19,74 @@ void DataFile::AddRecord(string imageFilename, string name, int age)
 	r->name = name;
 	r->age = age;
 
-	recordCount++;
+	newRecords.push_back(r);
 }
 
-/*
-void DataFile::Save(string filename)
+// Reads the int at the start of the database representing the number of records it contains
+// and stores it in recordCount
+// Then iterates through each of the different records stored in the database and stores their locations in an array
+// to be used for loading with Database::Load
+void DataFile::GetDatabaseInfo(string filename)
 {
-	ofstream outfile(filename, ios::binary);
+	ifstream infile(filename, ios::binary);
+	infile.read((char*)&recordCount, sizeof(int)); // Set the record count
 
-	outfile.write((char*)&recordCount, sizeof(int));
+	// Intialise variables for record reading
+	int nameSize = 0;
+	int ageSize = 0;
+	int width = 0, height = 0, format = 0, imageSize = 0;
 
+	for (int i = 0; i < recordCount; i++)
+	{
+		recordIndexes[i] = infile.tellg(); // Save the location of the current record to the recordIndexes array
+
+		infile.read((char*)&width, sizeof(int)); // Read and store the image width from the .dat
+		infile.read((char*)&height, sizeof(int)); // Read and store the image height from the .dat
+
+		infile.read((char*)&nameSize, sizeof(int)); // Read and store the length of the name from the .dat
+		infile.read((char*)&ageSize, sizeof(int)); // Read and store the length of the age from the .dat
+
+		imageSize = sizeof(Color) * width * height; // Set the filesize of the image
+		char* imgdata = new char[imageSize]; // Initialise variable for image data
+		infile.read(imgdata, imageSize); // Read and store the image data from the .dat
+		Image img = LoadImageEx((Color*)imgdata, width, height); // Create a raylib image file using the image data
+
+		char* name = new char[nameSize]; // Initialise variable for name
+		int age = 0; // Initialise variable for age
+
+		infile.read((char*)name, nameSize); // Read and store the name from the .dat
+		infile.read((char*)&age, ageSize); // Read and store the age from the .dat
+
+		delete[] imgdata;
+		delete[] name;
+	}
+
+	infile.close();
+}
+
+// Saves the current records and any new ones to a new database
+void DataFile::Save(string readFilename, string writeFilename)
+{
+	ifstream infile(readFilename, ios::binary);
+
+	// Put all the existing records into a vector
+	vector<DataFile::Record*> records;
+	for (int i = 0; i < recordCount; i++)
+	{
+		records.push_back(Load(readFilename, i));
+	}
+	infile.close();
+
+	for (int i = 0; i < newRecords.size(); i++)
+	{
+		records.push_back(newRecords[i]); // Add any new records to the vector of existing records
+	}
+
+	ofstream outfile(writeFilename, ios::binary);
+	int newRecordCount = records.size();
+	outfile.write((char*)&newRecordCount, sizeof(int)); // Write the new record size to the new database
+
+	// Write all the record data to the new database
 	for (int i = 0; i < recordCount; i++)
 	{		
 		Color* imgdata = GetImageData(records[i]->image);
@@ -53,51 +108,44 @@ void DataFile::Save(string filename)
 
 	outfile.close();
 }
-*/
 
+// Returns a record at a specified index from a specified database
 DataFile::Record* DataFile::Load(string filename, int index)
 {
 	ifstream infile(filename, ios::binary);
 
-	infile.read((char*)&recordCount, sizeof(int)); // Set the record count
-
-	cout << infile.tellg() << endl;
-
-	infile.seekg(index * sizeof(DataFile::Record), ios::cur); // Set the read position to that of the current record
-
-	cout << infile.tellg() << endl;
+	infile.seekg(recordIndexes[index], ios::beg); // Set the reader position to the record location
 	
+	// Intialise variables for record reading
 	int nameSize = 0;
 	int ageSize = 0;
 	int width = 0, height = 0, format = 0, imageSize = 0;
 
-	infile.read((char*)&width, sizeof(int));
-	infile.read((char*)&height, sizeof(int));
+	infile.read((char*)&width, sizeof(int)); // Read and store the image width from the .dat
+	infile.read((char*)&height, sizeof(int)); // Read and store the image height from the .dat
 
-	imageSize = sizeof(Color) * width * height;
+	infile.read((char*)&nameSize, sizeof(int)); // Read and store the length of the name from the .dat
+	infile.read((char*)&ageSize, sizeof(int)); // Read and store the length of the age from the .dat
 
-	infile.read((char*)&nameSize, sizeof(int));
-	infile.read((char*)&ageSize, sizeof(int));
+	imageSize = sizeof(Color) * width * height; // Set the filesize of the image
+	char* imgdata = new char[imageSize]; // Initialise variable for image data
+	infile.read(imgdata, imageSize); // Read and store the image data from the .dat
+	Image img = LoadImageEx((Color*)imgdata, width, height); // Create a raylib image file using the image data
 
-	char* imgdata = new char[imageSize];
-	infile.read(imgdata, imageSize);
+	char* name = new char[nameSize]; // Initialise variable for name
+	int age = 0; // Initialise variable for age
 
-	Image img = LoadImageEx((Color*)imgdata, width, height);
-	char* name = new char[nameSize];
-	int age = 0;
-				
-	infile.read((char*)name, nameSize);
-	infile.read((char*)&age, ageSize);
+	infile.read((char*)name, nameSize); // Read and store the name from the .dat
+	infile.read((char*)&age, ageSize); // Read and store the age from the .dat
 
-	cout << infile.tellg() << endl;
-
+	// Save the information to a new record and then return it
 	Record* r = new Record();
 	r->image = img;
 	r->name = string(name);
 	r->age = age;
 
-	delete [] imgdata;
-	delete [] name;
+	delete[] imgdata;
+	delete[] name;
 
 	infile.close();
 
