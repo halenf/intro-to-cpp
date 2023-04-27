@@ -4,7 +4,10 @@
 using namespace std;
 
 DataFile::DataFile()
-{ }
+{
+	int recordCount = 0;
+	int recordIndexes[255] = { 0 };
+}
 
 DataFile::~DataFile()
 { }
