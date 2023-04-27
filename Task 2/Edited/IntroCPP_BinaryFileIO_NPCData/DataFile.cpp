@@ -4,10 +4,7 @@
 using namespace std;
 
 DataFile::DataFile()
-{
-	int recordCount = 0;
-	int recordIndexes[255] = { 0 };
-}
+{ }
 
 DataFile::~DataFile()
 { }
@@ -85,7 +82,7 @@ void DataFile::Save(string readFilename, string writeFilename)
 		records.push_back(newRecords[i]); // Add any new records to the vector of existing records
 	}
 
-	ofstream outfile(writeFilename, ios::binary);
+	ofstream outfile(writeFilename + ".dat", ios::binary);
 	int newRecordCount = records.size();
 	outfile.write((char*)&newRecordCount, sizeof(int)); // Write the new record size to the new database
 
@@ -118,7 +115,7 @@ DataFile::Record* DataFile::Load(string filename, int index)
 	ifstream infile(filename, ios::binary);
 
 	infile.seekg(recordIndexes[index], ios::beg); // Set the reader position to the record location
-	
+
 	// Intialise variables for record reading
 	int nameSize = 0;
 	int ageSize = 0;

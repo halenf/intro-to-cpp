@@ -24,42 +24,30 @@
 #include "ctype.h"
 #include <iostream>
 
-void CharFromName(char* name, DataFile::Record* currentRecord);
-
 int main(int argc, char* argv[])
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    int screenWidth = 800;
-    int screenHeight = 450;
-
-    InitWindow(screenWidth, screenHeight, "NPC Data-Checker");
-
     string currentDatabase;
     cout << "Insert name of database to be loaded." << endl;
     std::cin.clear();
     std::cin.ignore(std::cin.rdbuf()->in_avail());
     cin >> currentDatabase;
 
+    int screenWidth = 800;
+    int screenHeight = 450;
+
+    InitWindow(screenWidth, screenHeight, "NPC Data-Checker");
+
     DataFile data;
     int currentRecordIdx = 0;
     
     // Attempts to load the database from the 'currentDatabase' filename
-    // If an exception is thrown, it is displayed, and then the program ends
-    try
-    {
-        data.GetDatabaseInfo(currentDatabase);
-    }
-    catch (const exception& e)
-    {
-        e.what();
-        return 0;
-    }
+    data.GetDatabaseInfo(currentDatabase);
 
     DataFile::Record* currentRecord = data.Load(currentDatabase, currentRecordIdx);
     Texture2D recordTexture = LoadTextureFromImage(currentRecord->image);
     char name[255]; // Create a char array
-    CharFromName(name, currentRecord);
 
     SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
@@ -84,7 +72,6 @@ int main(int argc, char* argv[])
             {
                 currentRecord = data.Load(currentDatabase, currentRecordIdx);
                 recordTexture = LoadTextureFromImage(currentRecord->image);
-                CharFromName(name, currentRecord);
             }
         }
 
@@ -100,7 +87,6 @@ int main(int argc, char* argv[])
             {
                 currentRecord = data.Load(currentDatabase, currentRecordIdx);
                 recordTexture = LoadTextureFromImage(currentRecord->image);
-                CharFromName(name, currentRecord);
             }
         }
 
@@ -130,16 +116,7 @@ int main(int argc, char* argv[])
 
             std::cin >> inputAge; // Get age
 
-            // Try to add the new record, but if any exceptions are called, then cancel
-            try
-            {
-                data.AddRecord(inputFile, inputName, inputAge);
-            }
-            catch (const exception& e)
-            {
-                e.what();
-                cout << "Check your filename and input type." << endl;
-            }
+            data.AddRecord(inputFile, inputName, inputAge); // Add the new record to the database waiting list
         }
 
         // Saves the current record and new records to a new database
@@ -147,20 +124,27 @@ int main(int argc, char* argv[])
         {
             string newDatabase;
 
-            cout << "Please insert the filename of the image." << endl;
+            cout << "Please insert the name for your new database (Do not include a file-type)." << endl;
             std::cin.clear();
             std::cin.ignore(std::cin.rdbuf()->in_avail());
 
             std::cin >> newDatabase; // Get filename
 
-            // Try to save to new database, cancels if an exception occurs
-            try
+            data.Save(currentDatabase, newDatabase); // Save to the new database
+        }
+
+        char name[255]; // Create a char array
+        memset(name, 0, 255);
+        for (int i = 0; i < currentRecord->name.length(); i++) // Iterate over each char in currentRecord->name
+        {
+            if (currentRecord->name[i] >= 32 && currentRecord->name[i] <= 122) // If the char is a letter/standard symbol
             {
-                data.Save(currentDatabase, newDatabase);
+                name[i] = currentRecord->name[i]; // Put the char into the new array
             }
-            catch (const exception& e)
+            else // If the checked char is not within the defined range, it is not a letter
             {
-                e.what();
+                name[i] = '\0'; // Add the null factor terminator to the end of the new char array
+                break; // Exit the loop
             }
         }
 
@@ -180,28 +164,12 @@ int main(int argc, char* argv[])
 
         EndDrawing();
         //----------------------------------------------------------------------------------
-
-        // De-Initialization
-        //--------------------------------------------------------------------------------------   
-        CloseWindow();        // Close window and OpenGL context
-        //--------------------------------------------------------------------------------------
     }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------   
+    CloseWindow();        // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 
     return 0;
-}
-
-void CharFromName(char* name, DataFile::Record* currentRecord)
-{
-    for (int i = 0; i < currentRecord->name.length() - 1; i++) // Iterate over each char in currentRecord->name
-    {
-        if (currentRecord->name[i] >= 65 && currentRecord->name[i] <= 122) // If the char is a letter/standard symbol
-        {
-            name[i] = currentRecord->name[i]; // Put the char into the new array
-        }
-        else // If the checked char is not within the defined range, it is not a letter
-        {
-            name[i] = '\0'; // Add the null factor terminator to the end of the new char array
-            break; // Exit the loop
-        }
-    }
 }
