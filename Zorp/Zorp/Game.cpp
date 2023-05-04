@@ -188,7 +188,7 @@ int Game::GetCommand()
 	// move cursor to correct position
 	std::cout << CSI << PLAYER_INPUT_Y << ";" << 0 << "H";
 	// Clear existing text
-	std::wcout << CSI << "4M";
+	std::cout << CSI << "4M";
 	// Insert 4 blank lines to ensure that the inventory output remains correct
 	std::cout << CSI << "4L";
 
