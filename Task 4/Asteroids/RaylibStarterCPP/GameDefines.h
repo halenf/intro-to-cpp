@@ -1,0 +1,21 @@
+#pragma once
+
+#define SCREEN_WIDTH 			600
+#define SCREEN_HEIGHT 			600
+
+#define PLAYER_SIZE				20.0f
+#define PLAYER_SPEED			6.0f
+#define PLAYER_MAX_SHOTS		10
+
+#define SHOT_SIZE				2
+
+#define ASTEROID_BASE_HEALTH	1.0f
+#define ASTEROID_BASE_SPEED		2.0f
+#define MAX_LARGE_ASTEROID		4
+#define MAX_MEDIUM_ASTEROID		8
+#define MAX_SMALL_ASTEROID		12
+#define ASTEROID_RESPAWN_TIME	3.0f
+
+#define MAX_POWERUPS			3
+#define MIN_POWERUP_SPAWN_TIME	5.0f
+#define MAX_POWERUP_SPAWN_TIME	10.0f
