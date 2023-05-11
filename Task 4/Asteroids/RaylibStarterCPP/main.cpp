@@ -22,8 +22,7 @@ int main(int argc, char* argv[])
     // Game loop
     while (!WindowShouldClose())
     {
-        game.Update();
-        game.Draw();
+        game.UpdateDrawFrame();
     }
 
     // Unload textures, sounds, etc. and exit game

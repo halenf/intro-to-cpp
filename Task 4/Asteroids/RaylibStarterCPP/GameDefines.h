@@ -1,16 +1,20 @@
 #pragma once
 
-#define SCREEN_WIDTH 			600
-#define SCREEN_HEIGHT 			600
+#define SCREEN_WIDTH 			800
+#define SCREEN_HEIGHT 			800
 
 #define PLAYER_SIZE				20.0f
-#define PLAYER_SPEED			6.0f
+#define PLAYER_SPEED			4.5f
 #define PLAYER_MAX_SHOTS		10
+#define PLAYER_ROTATION_SPEED	3.5f
+#define PLAYER_ACCELERATION		0.04f;
 
 #define SHOT_SIZE				2
+#define SHOT_LIFE_TIME			50
 
 #define ASTEROID_BASE_HEALTH	1.0f
-#define ASTEROID_BASE_SPEED		2.0f
+#define ASTEROID_BASE_SPEED		100.0f
+#define ASTEROID_BASE_RADIUS	10.0f
 #define MAX_LARGE_ASTEROID		4
 #define MAX_MEDIUM_ASTEROID		8
 #define MAX_SMALL_ASTEROID		12

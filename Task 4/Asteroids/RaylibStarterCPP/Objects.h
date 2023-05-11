@@ -1,9 +1,11 @@
 #pragma once
 #include "raylib.h"
+#include <iostream>
+#include <vector>
 
 typedef struct Player {
 	Vector2 position;
-	Vector2 speed;
+	Vector2 velocity;
 	float acceleration;
 	float rotation;
 	Vector3 collider;
@@ -12,18 +14,26 @@ typedef struct Player {
 
 typedef struct Shot {
 	Vector2 position;
-	Vector2 speed;
+	Vector2 velocity;
 	float radius;
 	float rotation;
-	int lifeSpawn;
-	bool active;
+	int lifeTime;
 	Color colour;
+
+public:
+	friend bool operator== (const Shot& s1, const Shot& s2)
+	{
+		return (s1.position.x == s2.position.x && s1.position.y == s2.position.y);
+	}
 } Shot;
+
+enum AsteroidType { Small, Medium, Large };
 
 typedef struct Asteroid {
 	Vector2 position;
-	Vector2 speed;
+	Vector2 velocity;
 	float radius;
+	AsteroidType type;
 	float health;
 	bool active;
 	Color colour;
@@ -37,4 +47,4 @@ typedef struct Powerup {
 	float radius;
 	bool active;
 	Color colour;
-};
+} Powerup;
