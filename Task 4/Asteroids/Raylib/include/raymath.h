@@ -229,6 +229,13 @@ RMDEF Vector2 Vector2MultiplyV(Vector2 v1, Vector2 v2)
     return result;
 }
 
+// Multiply vector by float
+RMDEF Vector2 Vector2MultiplyF(Vector2 v, float f)
+{
+    Vector2 result = { v.x * f, v.y * f };
+    return result;
+}
+
 // Negate vector
 RMDEF Vector2 Vector2Negate(Vector2 v)
 {

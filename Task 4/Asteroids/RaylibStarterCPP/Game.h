@@ -1,6 +1,11 @@
 #pragma once
 #include "GameDefines.h"
-#include "Objects.h"
+
+#include "Asteroid.h"
+#include "Player.h"
+#include "Powerup.h"
+#include "Shot.h"
+
 #include <iostream>
 #include <vector>
 

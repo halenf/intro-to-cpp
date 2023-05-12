@@ -2,6 +2,10 @@
 
 #define SCREEN_WIDTH 			800
 #define SCREEN_HEIGHT 			800
+#define FPS						60
+
+#define DRAG_CONSTANT			0.02f
+#define INELASTIC_CONSTANT		1.0f
 
 #define PLAYER_SIZE				20.0f
 #define PLAYER_SPEED			4.5f
@@ -11,6 +15,7 @@
 
 #define SHOT_SIZE				2
 #define SHOT_LIFE_TIME			50
+#define SHOT_DAMAGE				1.0f
 
 #define ASTEROID_BASE_HEALTH	1.0f
 #define ASTEROID_BASE_SPEED		100.0f

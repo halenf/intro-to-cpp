@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
     InitWindow(screenWidth, screenHeight, "Asteroids");
 
     // Set framerate target
-    SetTargetFPS(60);
+    SetTargetFPS(FPS);
     
     // Instantiate game class
     Game game;

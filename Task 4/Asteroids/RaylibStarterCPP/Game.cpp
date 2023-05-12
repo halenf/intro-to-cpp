@@ -33,9 +33,13 @@ void Game::Init()
     player.colour = RED;
 
     // Initialise shots
+    shots.clear();
     shots.reserve(20);
 
     // Initialise asteroids
+    int arraySet[3] = { 0, 0, 0 };
+    std::copy(std::begin(arraySet), std::end(arraySet), asteroidCount); // Reset asteroidCount
+
     for (int i = 0; i < MAX_LARGE_ASTEROID + MAX_MEDIUM_ASTEROID + MAX_SMALL_ASTEROID; i++)
     {
         // Generate random asteroid type
@@ -93,10 +97,9 @@ void Game::Init()
         // Set health based on asteroid type
         float health = ASTEROID_BASE_HEALTH * (type + 1);
         
-        float colourValue = 110 + 40 * type + GetRandomValue(0, 65);
-
         // Set colour based on type
-        Color colour = { colourValue, colourValue, colourValue, 255};
+        float colourValue = 110 + 40 * type + GetRandomValue(0, 65);
+        Color colour = { colourValue, colourValue, colourValue, 255 };
 
         asteroids[i].position = { posX, posY };
         asteroids[i].velocity = { velX, velY };
@@ -129,7 +132,7 @@ void Game::Update()
             }
             else
             {
-                if (player.acceleration > 0) player.acceleration -= playerAcceleration / 2;
+                if (player.acceleration > 0) player.acceleration -= DRAG_CONSTANT;
                 else if (player.acceleration < 0) player.acceleration = 0;
             }
 
@@ -169,22 +172,22 @@ void Game::Update()
                 shots[i].position.x += shots[i].velocity.x;
                 shots[i].position.y += shots[i].velocity.y;
 
-                if (shots[i].position.x < 0)
+                if (shots[i].position.x < -shots[i].radius / 2)
                 {
                     EraseShot(shots[i]);
                     break;
                 }
-                if (shots[i].position.x > SCREEN_WIDTH)
+                if (shots[i].position.x > SCREEN_WIDTH + shots[i].radius / 2)
                 {
                     EraseShot(shots[i]);
                     break;
                 }
-                if (shots[i].position.y < 0)
+                if (shots[i].position.y < -shots[i].radius / 2)
                 {
                     EraseShot(shots[i]);
                     break;
                 }
-                if (shots[i].position.y > SCREEN_HEIGHT)
+                if (shots[i].position.y > SCREEN_HEIGHT + shots[i].radius / 2)
                 {
                     EraseShot(shots[i]);
                     break;
@@ -193,12 +196,12 @@ void Game::Update()
 
             for (int i = 0; i < shots.size(); i++)
             {
-                shots[i].lifeTime++;
                 if (shots[i].lifeTime >= SHOT_LIFE_TIME)
                 {
                     EraseShot(shots[i]);
                     break;
                 }
+                shots[i].lifeTime++;
             }
 
             // Meteor logic
@@ -232,9 +235,31 @@ void Game::Update()
                 {
                     if (asteroids[j].active && CheckCollisionCircles(shots[i].position, shots[i].radius, asteroids[j].position, asteroids[j].radius))
                     {
-                        std::cout << "Shot at position " << shots[i].position.x << ", " << shots[i].position.y << " collided with asteroid at position " << asteroids[j].position.x << ", " << asteroids[j].position.y << std::endl;
+                        std::cout << "Shot at position " << shots[i].position.x << ", " << shots[i].position.y << " collided with asteroid at position " << asteroids[j].position.x << ", " << asteroids[j].position.y << std::endl; // debug
+                        asteroids[j].health -= SHOT_DAMAGE;
+                        if (asteroids[j].health <= 0)
+                        {
+                            asteroids[j].active = false;
+                        }
+                        else
+                        {
+                            asteroids[j].SetVelocity(Vector2Subtract(shots[i].velocity, asteroids[j].velocity));
+                            
+                            /*
+                            Vector2 direction = Vector2Subtract(shots[i].velocity, asteroids[j].velocity); // Vector representing the resultant vector of the bullet-asteroid collision
+                            float a = 1 / (((float)asteroids[j].type + 1) * INELASTIC_CONSTANT); // Asteroid type / amplitude
+                            float x = Vector2Length(direction); // Length of the resultant vector 'direction' / variable
+                            float b = Vector2Length(shots[i].velocity) + Vector2Length(asteroids[j].velocity); // Represents the maximum amount of momentum that can be transferred
+                                                                                                               // to the asteroid / period
+                            std::cout << "Resultant vector length: " << x << std::endl;
+                            std::cout << "Maximum vector length: " << b << std::endl;
+                            float multiplier = a * cos(((2 * PI) / b) * x) + a; // Provides a 0-1 multiplier (affected by asteroid type) that changes how much of the bullet's momentum
+                                                                                // is transferred in the collision. Will be higher if the collision is direct rather than just a "glance".
+                            std::cout << "Momentum transfer multiplier: " << multiplier << std::endl; // debug
+                            asteroids[j].AddVelocity(shots[i].velocity.x * multiplier, shots[i].velocity.y * multiplier); // Transfer the momentum to the asteroid
+                            */
+                        }
                         EraseShot(shots[i]);
-                        asteroids[j].active = false;
                         break;
                     }
                 }
@@ -255,8 +280,8 @@ void Game::Update()
     {
         if (IsKeyPressed(KEY_ENTER))
         {
+            std::cout << "Game restarting" << std::endl;
             Init();
-            gameOver = false;
         }
         if (IsKeyPressed(KEY_ESCAPE))
         {
@@ -280,7 +305,7 @@ void Game::Draw()
         DrawTriangle(v1, v2, v3, RED);
         DrawCircle(player.position.x, player.position.y, 4, RED);
 
-        DrawTextureEx
+        //DrawTextureEx(); // For using sprite instead of circle
 
         // Draw shots
         for (int i = 0; i < shots.size(); i++)
@@ -311,7 +336,8 @@ void Game::Draw()
     }
     else
     {
-        DrawText("You Lose...", SCREEN_WIDTH / 2 , SCREEN_HEIGHT / 2, 48, WHITE);
+        // Lose text
+        DrawText("You Lose...", SCREEN_WIDTH / 2 - MeasureText("You Lose...", 48), SCREEN_HEIGHT / 2, 48, WHITE);
     }
 
     EndDrawing();
@@ -331,11 +357,11 @@ void Game::UpdateDrawFrame()
 void Game::EraseShot(Shot shot)
 {
     shots.erase(std::find(shots.begin(), shots.end(), shot));
-    std::cout << "Erased shot at position " << shot.position.x << ", " << shot.position.y << std::endl;
+    std::cout << "Erased shot at position " << shot.position.x << ", " << shot.position.y << std::endl; // debug
 }
 
 void Game::EraseShot(std::vector<Shot>::iterator iter)
 {
     shots.erase(iter);
-    std::cout << "Erased shot at position " << shots[iter - shots.begin()].position.x << ", " << shots[iter - shots.begin()].position.y << std::endl;
+    std::cout << "Erased shot at position " << shots[iter - shots.begin()].position.x << ", " << shots[iter - shots.begin()].position.y << std::endl; // debug
 }
