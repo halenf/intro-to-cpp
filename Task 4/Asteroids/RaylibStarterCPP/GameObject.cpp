@@ -36,3 +36,9 @@ void GameObject::AddVelocity(Vector2 velocity)
 	this->velocity.x += (velocity.x);
 	this->velocity.y += (velocity.y);
 }
+
+void GameObject::AddVelocity(Vector2 velocity, float multiplier)
+{
+	this->velocity.x += (velocity.x * multiplier);
+	this->velocity.y += (velocity.y * multiplier);
+}

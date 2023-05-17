@@ -13,6 +13,7 @@ public:
 	AsteroidType type;
 	float health;
 	bool active;
+	float respawnTimer;
 public:
 	
 };

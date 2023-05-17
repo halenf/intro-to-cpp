@@ -11,6 +11,7 @@ public:
 	void SetVelocity(Vector2 velocity);
 	void AddVelocity(float x, float y);
 	void AddVelocity(Vector2 velocity);
+	void AddVelocity(Vector2 velocity, float multiplier);
 
 	Vector2 position;
 	Vector2 velocity;

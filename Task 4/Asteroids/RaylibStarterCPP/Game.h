@@ -17,15 +17,17 @@ public:
 
 public:
 	void Init();
-	void Update();
-	void Draw();
 	void Unload();	
 	void UpdateDrawFrame();
 
 private:
 	// Private functions
+	void Update();
+	void Draw();
+
 	void EraseShot(Shot shot);
 	void EraseShot(std::vector<Shot>::iterator iter);
+	void InitAsteroid(int i);
 
 	// Game states
 	bool gameOver;
@@ -33,6 +35,7 @@ private:
 	bool win;
 
 	// Player info
+	int score;
 	float shipHeight;
 	float playerAcceleration = PLAYER_ACCELERATION;
 
