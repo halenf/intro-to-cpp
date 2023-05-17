@@ -51,13 +51,8 @@ int main(int argc, char** argv)
 		int rowIndex = 0;
 		int colIndex = 0;
 		
-		int tempIndex = index;
-		while (tempIndex >= COLS)
-		{
-			tempIndex -= COLS;
-			rowIndex++;
-		}
-		colIndex = tempIndex;
+		rowIndex = index / COLS;
+		colIndex = index % COLS;
 
 		// use the resulting row and column index to print the value
 		std::cout << grid2D[rowIndex][colIndex] << ", ";

@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 	*/
 	// Task1: Write your Code here
 	// ------------------------------------------------------------------------
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < NUM_NUMBERS; i++)
 	{
 		std::cout << numbers[i] << ", ";
 	}
@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 
 	// Task 2: Write your Code here
 	// ------------------------------------------------------------------------
-	for (int i = 4; i >= 0; i--)
+	for (int i = NUM_NUMBERS - 1; i >= 0; i--)
 	{
 		std::cout << numbers[i] << ", ";
 	}

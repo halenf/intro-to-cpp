@@ -29,10 +29,13 @@ int main(int argc, char* argv[])
     // Initialization
     //--------------------------------------------------------------------------------------
     string currentDatabase;
+    /*
     cout << "Insert name of database to be loaded." << endl;
     std::cin.clear();
     std::cin.ignore(std::cin.rdbuf()->in_avail());
     cin >> currentDatabase;
+    */
+    currentDatabase = "npc_data.dat";
 
     int screenWidth = 800;
     int screenHeight = 450;

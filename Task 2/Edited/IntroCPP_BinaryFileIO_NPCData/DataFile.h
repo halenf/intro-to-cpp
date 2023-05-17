@@ -17,7 +17,7 @@ public:
 
 private:
 	int recordCount; // Stores the number of records in the database
-	int recordIndexes[255]; // Stores the location of all the records in the database
+	int* recordIndexes; // Stores the location of all the records in the database
 	std::vector<Record*> newRecords; // Contains new records waiting to be saved to the database
 
 public:

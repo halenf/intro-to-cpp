@@ -24,42 +24,20 @@ void DataFile::AddRecord(string imageFilename, string name, int age)
 
 // Reads the int at the start of the database representing the number of records it contains
 // and stores it in recordCount
-// Then iterates through each of the different records stored in the database and stores their locations in an array
+// Saves the position of the first record to the recordIndexes array
 // to be used for loading with Database::Load
 void DataFile::GetDatabaseInfo(string filename)
 {
 	ifstream infile(filename, ios::binary);
 	infile.read((char*)&recordCount, sizeof(int)); // Set the record count
+	cout << "Record Count: " << recordCount << endl;
+	recordIndexes = new int[recordCount];
+	recordIndexes[0] = infile.tellg();
 
 	// Intialise variables for record reading
 	int nameSize = 0;
 	int ageSize = 0;
 	int width = 0, height = 0, format = 0, imageSize = 0;
-
-	for (int i = 0; i < recordCount; i++)
-	{
-		recordIndexes[i] = infile.tellg(); // Save the location of the current record to the recordIndexes array
-
-		infile.read((char*)&width, sizeof(int)); // Read and store the image width from the .dat
-		infile.read((char*)&height, sizeof(int)); // Read and store the image height from the .dat
-
-		infile.read((char*)&nameSize, sizeof(int)); // Read and store the length of the name from the .dat
-		infile.read((char*)&ageSize, sizeof(int)); // Read and store the length of the age from the .dat
-
-		imageSize = sizeof(Color) * width * height; // Set the filesize of the image
-		char* imgdata = new char[imageSize]; // Initialise variable for image data
-		infile.read(imgdata, imageSize); // Read and store the image data from the .dat
-		Image img = LoadImageEx((Color*)imgdata, width, height); // Create a raylib image file using the image data
-
-		char* name = new char[nameSize]; // Initialise variable for name
-		int age = 0; // Initialise variable for age
-
-		infile.read((char*)name, nameSize); // Read and store the name from the .dat
-		infile.read((char*)&age, ageSize); // Read and store the age from the .dat
-
-		delete[] imgdata;
-		delete[] name;
-	}
 
 	infile.close();
 }
@@ -146,6 +124,11 @@ DataFile::Record* DataFile::Load(string filename, int index)
 
 	delete[] imgdata;
 	delete[] name;
+
+	if (index <= recordCount)
+	{
+		recordIndexes[index + 1] = infile.tellg(); // Save the current position (the start of the next record) to the recordIndexes array
+	}
 
 	infile.close();
 
