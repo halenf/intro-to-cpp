@@ -1,4 +1,5 @@
 #pragma once
+#include "GameDefines.h"
 #include "raylib.h"
 
 class GameObject {
@@ -17,7 +18,4 @@ public:
 	Vector2 velocity;
 	float rotation;
 	Color colour;
-	
-public:
-
 };

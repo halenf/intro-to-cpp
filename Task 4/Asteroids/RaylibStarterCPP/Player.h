@@ -8,5 +8,12 @@ public:
 	{ };
 
 	float acceleration;
+	float health;
 	Vector3 collider;
+
+	// Powerups
+	float boostMultiplier;
+	float boostTimer;
+	bool shouldBomb;
+	int bombCount;
 };

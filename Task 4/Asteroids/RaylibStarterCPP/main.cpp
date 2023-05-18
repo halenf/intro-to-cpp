@@ -8,16 +8,13 @@ int main(int argc, char* argv[])
     int screenHeight = SCREEN_HEIGHT;
     
     // Create window
-    InitWindow(screenWidth, screenHeight, "Asteroids");
+    InitWindow(screenWidth, screenHeight, "Blasteroids");
 
     // Set framerate target
     SetTargetFPS(FPS);
     
     // Instantiate game class
     Game game;
-
-    // Run Game::Init()
-    game.Init();
 
     // Game loop
     while (!WindowShouldClose())

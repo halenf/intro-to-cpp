@@ -12,7 +12,7 @@ public:
 	float radius;
 	AsteroidType type;
 	float health;
-	bool active;
+	bool active = true;
 	float respawnTimer;
 public:
 	
