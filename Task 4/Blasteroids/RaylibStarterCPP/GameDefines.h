@@ -6,6 +6,7 @@
 
 #define TITLE_EFFECT_COUNT		20
 #define HIGHSCORE_NAME_MAX		3
+#define HIGHSCORE_COUNT			10
 
 #define HEALTHBAR_SIZE			50.0f
 

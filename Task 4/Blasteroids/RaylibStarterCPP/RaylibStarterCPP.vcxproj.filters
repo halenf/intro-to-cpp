@@ -16,6 +16,9 @@
     <Filter Include="Header Files\GameObjects">
       <UniqueIdentifier>{0377f94f-c442-4d8e-8f46-dd9a618cdb9a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Classes">
+      <UniqueIdentifier>{f0251ef3-5d25-40c1-b52e-23d1bb5a15a2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -25,10 +28,13 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GameObject.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Classes</Filter>
     </ClCompile>
     <ClCompile Include="Powerup.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="FileWriter.cpp">
+      <Filter>Source Files\Classes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -55,9 +61,6 @@
     </ClInclude>
     <ClInclude Include="Shot.h">
       <Filter>Header Files\GameObjects</Filter>
-    </ClInclude>
-    <ClInclude Include="Highscore.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FileWriter.h">
       <Filter>Header Files</Filter>

@@ -1,13 +1,11 @@
 #pragma once
-#include "GameDefines.h"
-
 #include "Asteroid.h"
 #include "Player.h"
 #include "Powerup.h"
 #include "Shot.h"
+#include "FileWriter.h"
 
-#include <iostream>
-#include <vector>
+enum GameState { Start, Playing, GameOver, ViewHighscores };
 
 class Game
 {
@@ -43,8 +41,7 @@ private:
 	int frameCounter;
 
 	// Game states
-	bool start;
-	bool playing;
+	GameState gameState;
 	bool pause;
 
 	// Title screen effect
@@ -67,4 +64,7 @@ private:
 	Powerup powerups[MAX_POWERUPS];
 	Color powerupColours[3] = { RED, BLUE, YELLOW };
 	
+	// Highscore writer
+	FileWriter highscoreWriter;
+
 };

@@ -1,15 +1,18 @@
 #include "Game.h"
-#include "raylib.h"
 #include "raymath.h"
+
+#include <iostream>
 #include <cstdlib>
 #include <time.h>
 #include <math.h>
 #include <random>
 #include <string>
 
+using namespace std;
+
 Game::Game()
 {
-    start = true; 
+    gameState = Start;
 }
 
 Game::~Game()
@@ -17,66 +20,75 @@ Game::~Game()
 
 void Game::Init()
 {
-    // Set the rng seed
-    srand(time(0));
+    switch (gameState) {
+    case Start:
+        // Set the rng seed
+        srand(time(0));
 
-    // Game state
-    start = false;
-    playing = true;
-    pause = false;
+        // Set static values
+        shipHeight = (PLAYER_SIZE / 2) / tanf(20 * DEG2RAD);
+        player.colour = RED;
 
-    // Set player values
-    score = 0;
-    shipHeight = (PLAYER_SIZE / 2) / tanf(20 * DEG2RAD);
+        // Setup highscoreWriter
+        highscoreWriter.CreateHighscoreFile();
 
-    // Highscore saving
-    name[0] = '\0';
-    charCount = 0;
-    frameCounter = 0;
-    scoreSaved = false;
+        break;
 
-    // Initialise player
-    player.position = { SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - shipHeight / 2 };
-    player.velocity = { 0, 0 };
-    player.acceleration = 0;
-    player.rotation = 0;
-    player.health = PLAYER_MAX_HEALTH;
-    player.collider = { player.position.x + (float)sin(player.rotation * DEG2RAD) * (shipHeight / 2.5f), player.position.y - (float)cos(player.rotation * DEG2RAD) * (shipHeight / 2.5f), 12 };
-    player.colour = RED;
-    player.boostMultiplier = 1;
-    player.boostTimer = 0;
-    player.shouldBomb = false;
+    case Playing:
+        // Highscore saving
+        name[0] = '\0';
+        charCount = 0;
+        frameCounter = 0;
+        scoreSaved = false;
 
-    // Initialise shots
-    shots.clear();
-    shots.reserve(20);
+        // Initialise player
+        score = 0;
+        player.position = { SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - shipHeight / 2 };
+        player.velocity = { 0, 0 };
+        player.acceleration = 0;
+        player.rotation = 0;
+        player.health = PLAYER_MAX_HEALTH;
+        player.collider = { player.position.x + (float)sin(player.rotation * DEG2RAD) * (shipHeight / 2.5f), player.position.y - (float)cos(player.rotation * DEG2RAD) * (shipHeight / 2.5f), 12 };
+        player.boostMultiplier = 1;
+        player.boostTimer = 0;
+        player.shouldBomb = false;
 
-    // Initialise asteroids
-    int arraySet[3] = { 0, 0, 0 };
-    std::copy(std::begin(arraySet), std::end(arraySet), asteroidCount); // Reset asteroidCount
-    for (int i = 0; i < MAX_LARGE_ASTEROID + MAX_MEDIUM_ASTEROID + MAX_SMALL_ASTEROID; i++)
-    {
-        InitAsteroid(i);
-    }
+        // Initialise shots
+        shots.clear();
+        shots.reserve(20);
 
-    // Initialise powerups
-    for (int i = 0; i < MAX_POWERUPS; i++)
-    {
-        InitPowerup(i);
-        powerups[i].active = false;
+        // Initialise asteroids
+        int arraySet[3] = { 0, 0, 0 };
+        copy(begin(arraySet), end(arraySet), asteroidCount); // Reset asteroidCount
+        for (int i = 0; i < MAX_LARGE_ASTEROID + MAX_MEDIUM_ASTEROID + MAX_SMALL_ASTEROID; i++)
+        {
+            InitAsteroid(i);
+        }
+
+        // Initialise powerups
+        for (int i = 0; i < MAX_POWERUPS; i++)
+        {
+            InitPowerup(i);
+            powerups[i].active = false;
+        }
+        break;
     }
 }
 
 void Game::Update()
 {
-    if (start)
+    switch (gameState) {
+    case Start:
     {
         if (IsKeyPressed(KEY_ENTER))
         {
+            gameState = Playing;
             Init();
         }
+        break;
     }
-    if (playing)
+
+    case Playing:
     {
         // Toggles pause if 'P' is pressed
         if (IsKeyPressed(KEY_P)) pause = !pause;
@@ -92,7 +104,6 @@ void Game::Update()
             // Checking if the player should be boosting
             if (player.boostMultiplier != 1)
             {
-                std::cout << "Player boost timer: " << player.boostTimer << std::endl;
                 if (player.boostTimer <= 0)
                 {
                     player.boostMultiplier = 1;
@@ -121,7 +132,7 @@ void Game::Update()
 
             // Slows the player down if they hold left shift
             float lowGear;
-            if (IsKeyDown(KEY_LEFT_SHIFT)) 
+            if (IsKeyDown(KEY_LEFT_SHIFT))
             {
                 lowGear = 0.5f;
             }
@@ -143,7 +154,7 @@ void Game::Update()
             // Player health
             if (player.health <= 0)
             {
-                playing = false;
+                gameState = GameOver;
             }
 
             /// Shooting logic
@@ -283,7 +294,7 @@ void Game::Update()
                 {
                     if (asteroids[j].active && CheckCollisionCircles(shots[i].position, shots[i].radius, asteroids[j].position, asteroids[j].radius))
                     {
-                        //std::cout << "Shot at position " << shots[i].position.x << ", " << shots[i].position.y << " collided with asteroid at position " << asteroids[j].position.x << ", " << asteroids[j].position.y << std::endl; // debug
+                        //cout << "Shot at position " << shots[i].position.x << ", " << shots[i].position.y << " collided with asteroid at position " << asteroids[j].position.x << ", " << asteroids[j].position.y << endl; // debug
                         asteroids[j].health -= SHOT_DAMAGE; // Do damage to asteroid
                         if (asteroids[j].health > 0) // Apply a force to the asteroid if it wasn't destroyed
                         {
@@ -311,10 +322,13 @@ void Game::Update()
                 }
             }
         }
+        break;
     }
-    else
+
+    case GameOver:
     {
-        // Runs if the player has lost
+        /// Runs if the player has lost
+        // Player can only interact with the highscore saving text box if they haven't yet saved their score
         if (!scoreSaved)
         {
             // Submit score
@@ -353,11 +367,22 @@ void Game::Update()
             }
         }
 
-        /// Restart game
+        // Restart game
         if (IsKeyPressed(KEY_ENTER))
         {
+            gameState = Playing;
             Init();
         }
+
+        // View highscores
+        if (IsKeyPressed(KEY_LEFT_SHIFT))
+        {
+            gameState = ViewHighscores;
+            highscoreWriter.LoadHighscores();
+        }
+
+        break;
+    }
     }
 }
 
@@ -367,7 +392,8 @@ void Game::Draw()
 
     ClearBackground(BLACK);
 
-    if (start)
+    switch (gameState) {
+    case Start:
     {
         // Title animation
         for (int i = 0; i < TITLE_EFFECT_COUNT; i++)
@@ -377,7 +403,7 @@ void Game::Draw()
             float yOffset = 20 * sin(titleAngle - i);
             DrawText("Blasteroids", (SCREEN_WIDTH - MeasureText("Blasteroids", 72)) / 2 + xOffset, SCREEN_HEIGHT / 2 - 36 + yOffset, 72, colour);
         }
-        
+
         float xOffset = 32 * cos(2.5f * titleAngle + 2) * sin(8 - titleAngle);
         float yOffset = 32 * cos(0.56f * titleAngle) * sin(titleAngle);
 
@@ -386,8 +412,10 @@ void Game::Draw()
         titleAngle += GetFrameTime();
 
         DrawText("Press ENTER to play", (SCREEN_WIDTH - MeasureText("Press ENTER to play", 18)) / 2, SCREEN_HEIGHT / 2 + 96, 18, WHITE);
+        break;
     }
-    else if (playing)
+
+    case Playing:
     {
         // Draw player
         Vector2 v1 = { player.position.x + sinf(player.rotation * DEG2RAD) * (shipHeight), player.position.y - cosf(player.rotation * DEG2RAD) * (shipHeight) };
@@ -417,12 +445,12 @@ void Game::Draw()
         }
 
         // Draw FPS
-        DrawText(std::to_string(GetFPS()).c_str(), 0, 0, 24, WHITE);
+        DrawText(to_string(GetFPS()).c_str(), 0, 0, 24, WHITE);
 
         // Draw score
-        std::string sScore = "Score: " + std::to_string(score);
+        string sScore = "Score: " + to_string(score);
         DrawText(sScore.c_str(), SCREEN_WIDTH - 162, 0, 24, WHITE);
-        
+
         // Draw player health
         DrawPlayerHealth(0, SCREEN_HEIGHT - 24);
 
@@ -431,13 +459,15 @@ void Game::Draw()
         {
             DrawText("Paused", (SCREEN_WIDTH - MeasureText("Paused", 48)) / 2, SCREEN_HEIGHT / 2 - 24, 48, WHITE);
         }
+        break;
     }
-    else
+
+    case GameOver:
     {
         /// Game over text
         DrawText("Game Over!", (SCREEN_WIDTH - MeasureText("Game Over!", 48)) / 2, SCREEN_HEIGHT / 2 - 120, 48, WHITE);
         DrawText("Final Score:", (SCREEN_WIDTH - MeasureText("Final Score:", 24)) / 2, SCREEN_HEIGHT / 2 - 56, 24, WHITE);
-        std::string sScore = std::to_string(score);
+        string sScore = to_string(score);
         DrawText(sScore.c_str(), (SCREEN_WIDTH - MeasureText(sScore.c_str(), 36)) / 2, SCREEN_HEIGHT / 2 - 24, 36, WHITE);
         DrawText("Press ENTER to play again or ESC to exit.", (SCREEN_WIDTH - MeasureText("Press ENTER to play again or ESC to exit.", 18)) / 2, SCREEN_HEIGHT / 2 + 20, 18, WHITE);
 
@@ -462,6 +492,9 @@ void Game::Draw()
             }
             frameCounter++;
         }
+
+        break;
+    }
     }
 
     EndDrawing();
@@ -480,14 +513,14 @@ void Game::UpdateDrawFrame()
 
 void Game::EraseShot(Shot shot)
 {
-    shots.erase(std::find(shots.begin(), shots.end(), shot));
-    //std::cout << "Erased shot at position " << shot.position.x << ", " << shot.position.y << std::endl; // debug
+    shots.erase(find(shots.begin(), shots.end(), shot));
+    //cout << "Erased shot at position " << shot.position.x << ", " << shot.position.y << endl; // debug
 }
 
-void Game::EraseShot(std::vector<Shot>::iterator iter)
+void Game::EraseShot(vector<Shot>::iterator iter)
 {
     shots.erase(iter);
-    //std::cout << "Erased shot at position " << shots[iter - shots.begin()].position.x << ", " << shots[iter - shots.begin()].position.y << std::endl; // debug
+    //cout << "Erased shot at position " << shots[iter - shots.begin()].position.x << ", " << shots[iter - shots.begin()].position.y << endl; // debug
 }
 
 void Game::InitShot(float angle)

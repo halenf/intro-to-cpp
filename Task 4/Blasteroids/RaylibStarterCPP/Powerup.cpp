@@ -1,4 +1,5 @@
 #include "Powerup.h"
+#include "Player.h"
 
 void Powerup::ActivatePowerup(Player &player)
 {

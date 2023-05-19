@@ -1,8 +1,9 @@
 #pragma once
 #include "GameObject.h"
-#include "Player.h"
 
 enum PowerupType { Heal, Boost, Bomb };
+
+class Player;
 
 class Powerup : public GameObject {
 public:

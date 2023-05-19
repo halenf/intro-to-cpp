@@ -15,6 +15,7 @@ int main(int argc, char* argv[])
     
     // Instantiate game class
     Game game;
+    game.Init();
 
     // Game loop
     while (!WindowShouldClose())
