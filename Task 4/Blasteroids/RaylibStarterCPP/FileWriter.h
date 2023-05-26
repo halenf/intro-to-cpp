@@ -10,7 +10,8 @@ public:
 	~FileWriter();
 
 	void CreateHighscoreFile(); // Creates the 'highscores.dat' file if it doesnt exist
-	void SaveHighscore(); // Saves a highscore to 'highscore.dat' if it 
+	std::string SaveHighscore(std::string name, int score); // Saves a highscore to 'highscore.dat' if it beats a highscore
+	
 	void LoadHighscores(); // Loads the highscores from 'highscores.dat'
 
 	struct HighScore
@@ -22,15 +23,8 @@ public:
 
 	std::vector<HighScore> highScores;
 
-	struct SortByScore
-	{
-		inline bool operator() (const HighScore& highscore1, const HighScore& highscore2)
-		{
-			return (highscore1.score > highscore2.score);
-		}
-	};
-
 private:
 	bool CheckHighscoreFileExists(); // Returns if the 'highscores.dat' file exists
+	void WriteHighscores(); // Writes all of the current highscores in 'highScores' to the database
 
 };

@@ -7,6 +7,7 @@
 #include <math.h>
 #include <random>
 #include <string>
+#include <cctype>
 
 using namespace std;
 
@@ -36,10 +37,12 @@ void Game::Init()
 
     case Playing:
         // Highscore saving
+        highscoreWriter.highScores.clear();
         name[0] = '\0';
         charCount = 0;
         frameCounter = 0;
         scoreSaved = false;
+        displayText = "";
 
         // Initialise player
         score = 0;
@@ -328,13 +331,19 @@ void Game::Update()
     case GameOver:
     {
         /// Runs if the player has lost
-        // Player can only interact with the highscore saving text box if they haven't yet saved their score
+        // Load the highscores
+        if (highscoreWriter.highScores.empty())
+        {
+            highscoreWriter.LoadHighscores();
+        }
+
+        // Player can only interact with the highscore-saving text box if they haven't yet saved their score
         if (!scoreSaved)
         {
             // Submit score
-            if (IsKeyPressed(KEY_SPACE) && strlen(name) != 0)
+            if (IsKeyPressed(KEY_ENTER) && strlen(name) != 0)
             {
-                // Save to file goes here // debug
+                displayText = highscoreWriter.SaveHighscore(name, score); // Sets the display text based on if the player's highscore was saved
                 scoreSaved = true;
             }
 
@@ -344,10 +353,14 @@ void Game::Update()
             // Check if more characters have been pressed on the same frame
             while (key > 0)
             {
+                if (key == 32)
+                {
+                    break;
+                }
                 if (charCount < HIGHSCORE_NAME_MAX)
                 {
-                    name[charCount] = (char)key;
-                    name[charCount + 1] = '\0'; // Add null terminator at the end of the string.
+                    name[charCount] = toupper((char)key);
+                    name[charCount + 1] = '\0'; // Add null terminator at the end of the C-string.
                     charCount++;
 
                     key = GetKeyPressed();  // Check next character in the queue
@@ -358,7 +371,7 @@ void Game::Update()
                 }
             }
 
-            // Delete key
+            // Delete character from name
             if (IsKeyPressed(KEY_BACKSPACE))
             {
                 charCount--;
@@ -366,19 +379,11 @@ void Game::Update()
                 name[charCount] = '\0';
             }
         }
-
         // Restart game
-        if (IsKeyPressed(KEY_ENTER))
+        else if (IsKeyPressed(KEY_ENTER))
         {
             gameState = Playing;
             Init();
-        }
-
-        // View highscores
-        if (IsKeyPressed(KEY_LEFT_SHIFT))
-        {
-            gameState = ViewHighscores;
-            highscoreWriter.LoadHighscores();
         }
 
         break;
@@ -469,7 +474,22 @@ void Game::Draw()
         DrawText("Final Score:", (SCREEN_WIDTH - MeasureText("Final Score:", 24)) / 2, SCREEN_HEIGHT / 2 - 56, 24, WHITE);
         string sScore = to_string(score);
         DrawText(sScore.c_str(), (SCREEN_WIDTH - MeasureText(sScore.c_str(), 36)) / 2, SCREEN_HEIGHT / 2 - 24, 36, WHITE);
-        DrawText("Press ENTER to play again or ESC to exit.", (SCREEN_WIDTH - MeasureText("Press ENTER to play again or ESC to exit.", 18)) / 2, SCREEN_HEIGHT / 2 + 20, 18, WHITE);
+        if (scoreSaved)
+            DrawText("Press ENTER to play again or ESC to exit.", (SCREEN_WIDTH - MeasureText("Press ENTER to play again or ESC to exit.", 18)) / 2, SCREEN_HEIGHT / 2 + 20, 18, WHITE);
+        else
+            DrawText("Press ENTER to save your score or ESC to exit.", (SCREEN_WIDTH - MeasureText("Press ENTER to save your score or ESC to exit.", 18)) / 2, SCREEN_HEIGHT / 2 + 20, 18, WHITE);
+        DrawText(displayText.c_str(), (SCREEN_WIDTH - MeasureText(displayText.c_str(), 18)) / 2, SCREEN_HEIGHT / 2 + 100, 18, WHITE);
+
+        if (!highscoreWriter.highScores.empty())
+        {
+            for (int i = 0; i < HIGHSCORE_COUNT; i++)
+            {
+                string name = highscoreWriter.highScores[i].name;
+                string score = to_string(highscoreWriter.highScores[i].score);
+                string highscore = to_string(i + 1) + ". " + name + ": " + score;
+                DrawText(highscore.c_str(), (SCREEN_WIDTH - MeasureText(highscore.c_str(), 20)) / 2, SCREEN_HEIGHT / 2 + 120 + (i * 20), 20, WHITE);
+            }
+        }
 
         /// Draw text input field
         float boxX = SCREEN_WIDTH / 2 - 30;

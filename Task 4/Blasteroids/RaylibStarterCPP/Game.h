@@ -5,7 +5,7 @@
 #include "Shot.h"
 #include "FileWriter.h"
 
-enum GameState { Start, Playing, GameOver, ViewHighscores };
+enum GameState { Start, Playing, GameOver };
 
 class Game
 {
@@ -34,11 +34,13 @@ private:
 	// Draw functions
 	void DrawPlayerHealth(float x, float y);
 
-	// Highscore input
+	// Highscores
+	FileWriter highscoreWriter;
 	char name[HIGHSCORE_NAME_MAX + 1] = "\0";
 	int charCount;
 	bool scoreSaved;
 	int frameCounter;
+	std::string displayText;
 
 	// Game states
 	GameState gameState;
@@ -64,7 +66,4 @@ private:
 	Powerup powerups[MAX_POWERUPS];
 	Color powerupColours[3] = { RED, BLUE, YELLOW };
 	
-	// Highscore writer
-	FileWriter highscoreWriter;
-
 };
